@@ -4,6 +4,28 @@ import { classifyRateLimit } from "../rate-limit.js";
 import type { CodexRunResult, Job } from "../types.js";
 import { AppServerClient } from "./client.js";
 
+export async function validateThreadResume(
+  job: Pick<Job, "cwd" | "threadId" | "sandbox">,
+  options: { codexBin?: string; codexArgsPrefix?: string[]; env?: NodeJS.ProcessEnv } = {}
+): Promise<void> {
+  const client = new AppServerClient({
+    codexBin: options.codexBin,
+    codexArgsPrefix: options.codexArgsPrefix,
+    cwd: job.cwd,
+    env: options.env
+  });
+  try {
+    await client.start();
+    await client.request(
+      "thread/resume",
+      { threadId: job.threadId, cwd: job.cwd, sandbox: job.sandbox ?? DEFAULT_SANDBOX },
+      20_000
+    );
+  } finally {
+    client.stop();
+  }
+}
+
 export async function resumeWithAppServer(
   job: Job,
   options: { codexBin?: string; codexArgsPrefix?: string[]; env?: NodeJS.ProcessEnv; prompt?: string }

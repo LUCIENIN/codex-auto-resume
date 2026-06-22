@@ -5,6 +5,7 @@ import { runDaemon, startDaemon, stopDaemon } from "./daemon.js";
 import { defaultStateDir } from "./paths.js";
 import { createJob, loadJob, loadJobs, saveJob, summarizeJob } from "./store.js";
 import { runJobOnce } from "./supervisor.js";
+import { validateThreadResume } from "./app-server/supervisor.js";
 
 const program = new Command();
 const stateDir = defaultStateDir();
@@ -20,6 +21,21 @@ program
     console.log(`job ${job.id} created`);
     const result = await runJobOnce(job.id, { stateDir });
     console.log(result ? summarizeJob(result) : `job ${job.id} is already locked`);
+  });
+
+program
+  .command("adopt")
+  .argument("<thread-id>")
+  .argument("<task>")
+  .option("--cwd <dir>", "Working directory for the adopted thread", process.cwd())
+  .description("Adopt an existing Codex thread after validating it can be resumed")
+  .action(async (threadId: string, task: string, options: { cwd: string }) => {
+    const cwd = path.resolve(options.cwd);
+    await validateThreadResume({ cwd, threadId });
+    const job = await createJob({ stateDir, cwd, task });
+    const adopted = { ...job, status: "waiting_rate_limit" as const, threadId, nextRunAt: Date.now() };
+    await saveJob(stateDir, adopted);
+    console.log(summarizeJob(adopted));
   });
 
 program

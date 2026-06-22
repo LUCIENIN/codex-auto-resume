@@ -20,7 +20,7 @@ function line(value) {
 }
 
 if (args[0] === "app-server") {
-  if (mode !== "appserver-ok") {
+  if (mode !== "appserver-ok" && mode !== "appserver-bad-thread") {
     process.exit(2);
   }
   const statePath = process.env.FAKE_CODEX_STATE;
@@ -42,6 +42,10 @@ if (args[0] === "app-server") {
         fs.writeFileSync(statePath, JSON.stringify(calls));
       }
       if (message.id) {
+        if (mode === "appserver-bad-thread" && message.method === "thread/resume") {
+          process.stdout.write(`${JSON.stringify({ jsonrpc: "2.0", id: message.id, error: { code: -32603, message: "bad thread" } })}\n`);
+          continue;
+        }
         const result = message.method === "account/rateLimits/read"
           ? { rateLimits: { primary: { usedPercent: 0, resetsAt: null }, rateLimitReachedType: null }, rateLimitsByLimitId: null }
           : {};
