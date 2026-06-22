@@ -92,6 +92,8 @@ car daemon start
 car daemon stop
 ```
 
+The daemon is intentionally low-energy: by default it wakes once per hour, checks stored active jobs, reads Codex rate-limit state when a waiting job is due, and resumes unfinished work after quota reset.
+
 ### macOS launchd
 
 Edit `scripts/codex-auto-resume.plist` if needed, then:

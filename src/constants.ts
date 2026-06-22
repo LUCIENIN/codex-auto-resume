@@ -4,3 +4,4 @@ export const DEFAULT_RESUME_PROMPT =
   "不要重复已经完成的工作。完成剩余实现，运行测试，并总结结果。";
 export const MAX_AUTO_RESUMES = 5;
 export const RESET_BUFFER_MS = 30_000;
+export const DEFAULT_DAEMON_INTERVAL_MS = 60 * 60 * 1000;

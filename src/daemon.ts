@@ -1,12 +1,13 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { DEFAULT_DAEMON_INTERVAL_MS } from "./constants.js";
 import { daemonPidPath } from "./paths.js";
 import { loadJobs } from "./store.js";
 import { runJobOnce } from "./supervisor.js";
 import type { RunOptions } from "./types.js";
 
 export async function runDaemon(options: RunOptions & { intervalMs?: number; once?: boolean }): Promise<void> {
-  const intervalMs = options.intervalMs ?? 60_000;
+  const intervalMs = options.intervalMs ?? DEFAULT_DAEMON_INTERVAL_MS;
   for (;;) {
     const jobs = await loadJobs(options.stateDir);
     for (const job of jobs) {
