@@ -18,6 +18,7 @@ After linking, the command is available as `car`.
 
 ```bash
 car run "implement the remaining tests"
+car adopt <thread-id> "task name" --cwd /path/to/workspace
 car status
 car jobs
 car logs
@@ -31,6 +32,8 @@ car daemon stop
 ```bash
 codex exec --json "<task>"
 ```
+
+`car adopt` is for an existing Codex thread. It first validates that Codex App Server can resume the thread. If Codex reports a thread-store error, the thread is rejected and no job is queued.
 
 When a recoverable quota stop is detected, the job is persisted under the user state directory:
 
@@ -73,6 +76,7 @@ codex exec resume <THREAD_ID> --json "<resume prompt>"
 
 - Uses argument arrays for shell commands.
 - Does not pass `--yolo` or `--dangerously-bypass-approvals-and-sandbox`.
+- Uses Codex `workspace-write` sandbox by default and passes `--skip-git-repo-check` so non-git workspaces can still run.
 - Resumes only in the original job `cwd`.
 - Confirms the directory still exists before resuming.
 - Captures a git baseline and pauses if the worktree appears to have large unexplained changes.
@@ -160,3 +164,17 @@ npm run build
 ```
 
 Tests use a fake Codex executable and never call real OpenAI services.
+
+## Real Smoke Result
+
+The current implementation was also smoke-tested against real Codex CLI:
+
+```text
+car run smoke:
+command used: codex -s workspace-write exec --skip-git-repo-check --json ...
+result: completed
+thread: 019eef07-eb18-7b53-a870-28ce0c30096f
+file content: car-default-ok
+```
+
+Known limit: manually adopting an old Desktop thread can fail if Codex itself cannot read that session file. In that case `car adopt` rejects it instead of queuing a broken job.
