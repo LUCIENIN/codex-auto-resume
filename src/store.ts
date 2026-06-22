@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { jobsDir, logsDir } from "./paths.js";
 import type { GitBaseline, Job } from "./types.js";
 import { captureGitBaseline } from "./git-safety.js";
+import { DEFAULT_SANDBOX } from "./constants.js";
 
 export async function ensureStateDir(stateDir: string): Promise<void> {
   await mkdir(jobsDir(stateDir), { recursive: true });
@@ -23,6 +24,7 @@ export async function createJob(input: { stateDir: string; cwd: string; task: st
     status: "created",
     retryCount: 0,
     resumeAttempts: 0,
+    sandbox: DEFAULT_SANDBOX,
     logPath,
     createdAt: now,
     updatedAt: now,

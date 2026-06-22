@@ -1,5 +1,6 @@
 import { createWriteStream } from "node:fs";
 import { spawn } from "node:child_process";
+import { DEFAULT_SANDBOX } from "./constants.js";
 import { JsonlParser } from "./jsonl.js";
 import { classifyRateLimit } from "./rate-limit.js";
 import type { CodexRunResult, Job } from "./types.js";
@@ -93,11 +94,11 @@ export function buildCodexArgs(
   job: Pick<Job, "threadId" | "sandbox">,
   input: { resume: boolean; prompt: string; codexArgsPrefix?: string[] }
 ): string[] {
-  const sandboxArgs = job.sandbox ? ["-s", job.sandbox] : [];
+  const sandboxArgs = ["-s", job.sandbox ?? DEFAULT_SANDBOX];
   const prefix = input.codexArgsPrefix ?? [];
   return input.resume
-    ? [...prefix, ...sandboxArgs, "exec", "resume", job.threadId ?? "", "--json", input.prompt]
-    : [...prefix, ...sandboxArgs, "exec", "--json", input.prompt];
+    ? [...prefix, ...sandboxArgs, "exec", "resume", "--skip-git-repo-check", job.threadId ?? "", "--json", input.prompt]
+    : [...prefix, ...sandboxArgs, "exec", "--skip-git-repo-check", "--json", input.prompt];
 }
 
 function collectMessage(event: Record<string, unknown>): string | undefined {

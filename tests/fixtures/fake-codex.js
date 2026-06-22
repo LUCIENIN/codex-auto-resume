@@ -3,6 +3,18 @@ const mode = process.env.FAKE_CODEX_MODE || "success";
 const args = process.argv.slice(2);
 const fs = await import("node:fs");
 
+if (args[0] === "-s") {
+  args.splice(0, 2);
+}
+
+if (args[0] === "exec" && args[1] === "--skip-git-repo-check") {
+  args.splice(1, 1);
+}
+
+if (args[0] === "exec" && args[1] === "resume" && args[2] === "--skip-git-repo-check") {
+  args.splice(2, 1);
+}
+
 function line(value) {
   process.stdout.write(`${JSON.stringify(value)}\n`);
 }

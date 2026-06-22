@@ -5,3 +5,4 @@ export const DEFAULT_RESUME_PROMPT =
 export const MAX_AUTO_RESUMES = 5;
 export const RESET_BUFFER_MS = 30_000;
 export const DEFAULT_DAEMON_INTERVAL_MS = 60_000;
+export const DEFAULT_SANDBOX = "workspace-write" as const;

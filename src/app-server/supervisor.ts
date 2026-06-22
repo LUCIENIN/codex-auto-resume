@@ -1,4 +1,5 @@
 import { DEFAULT_RESUME_PROMPT } from "../constants.js";
+import { DEFAULT_SANDBOX } from "../constants.js";
 import { classifyRateLimit } from "../rate-limit.js";
 import type { CodexRunResult, Job } from "../types.js";
 import { AppServerClient } from "./client.js";
@@ -27,7 +28,11 @@ export async function resumeWithAppServer(
         error: "rate limit still active"
       };
     }
-    await client.request("thread/resume", { threadId: job.threadId, cwd: job.cwd, sandbox: job.sandbox }, 20_000);
+    await client.request(
+      "thread/resume",
+      { threadId: job.threadId, cwd: job.cwd, sandbox: job.sandbox ?? DEFAULT_SANDBOX },
+      20_000
+    );
     const completed = client.waitForNotification("turn/completed", 120_000);
     await client.request(
       "turn/start",
