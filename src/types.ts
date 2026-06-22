@@ -22,6 +22,7 @@ export type Job = {
   createdAt: string;
   updatedAt: string;
   lastError?: string;
+  sandbox?: "read-only" | "workspace-write" | "danger-full-access";
   gitBaseline?: GitBaseline;
 };
 

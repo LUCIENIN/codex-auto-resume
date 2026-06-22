@@ -27,7 +27,7 @@ export async function resumeWithAppServer(
         error: "rate limit still active"
       };
     }
-    await client.request("thread/resume", { threadId: job.threadId, cwd: job.cwd }, 20_000);
+    await client.request("thread/resume", { threadId: job.threadId, cwd: job.cwd, sandbox: job.sandbox }, 20_000);
     const completed = client.waitForNotification("turn/completed", 120_000);
     await client.request(
       "turn/start",

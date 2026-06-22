@@ -9,10 +9,7 @@ export async function runCodexCli(
   input: { resume: boolean; prompt: string; codexBin?: string; codexArgsPrefix?: string[]; env?: NodeJS.ProcessEnv }
 ): Promise<CodexRunResult> {
   const codexBin = input.codexBin ?? "codex";
-  const prefix = input.codexArgsPrefix ?? [];
-  const args = input.resume
-    ? [...prefix, "exec", "resume", job.threadId ?? "", "--json", input.prompt]
-    : [...prefix, "exec", "--json", input.prompt];
+  const args = buildCodexArgs(job, input);
 
   const log = createWriteStream(job.logPath, { flags: "a", mode: 0o600 });
   log.write(`\n[${new Date().toISOString()}] $ ${[codexBin, ...args].join(" ")}\n`);
@@ -90,6 +87,17 @@ export async function runCodexCli(
       log.end(`[exit ${code}]\n`, () => resolve(result));
     });
   });
+}
+
+export function buildCodexArgs(
+  job: Pick<Job, "threadId" | "sandbox">,
+  input: { resume: boolean; prompt: string; codexArgsPrefix?: string[] }
+): string[] {
+  const sandboxArgs = job.sandbox ? ["-s", job.sandbox] : [];
+  const prefix = input.codexArgsPrefix ?? [];
+  return input.resume
+    ? [...prefix, ...sandboxArgs, "exec", "resume", job.threadId ?? "", "--json", input.prompt]
+    : [...prefix, ...sandboxArgs, "exec", "--json", input.prompt];
 }
 
 function collectMessage(event: Record<string, unknown>): string | undefined {
